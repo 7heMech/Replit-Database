@@ -73,3 +73,7 @@ type = "pwa-node"
 
 [unitTest]
 language = "nodejs"
+
+[deployment]
+deploymentTarget = "static"
+publicDir = "/"

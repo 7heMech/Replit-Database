@@ -10,23 +10,6 @@ const parseJson = (val) => {
 
 const encode = encodeURIComponent;
 
-const transform = (str) => {
-  const starts = str.startsWith('/');
-  const includes = str.includes('//');
-
-  if (!starts && !includes) return str;
-
-  let key = str;
-  if (includes) key = key.replace(/(\/)\1+/g, () => '/');
-  if (starts) key = key.slice(1);
-
-  console.info(`\x1B[31mWarning:\x1B[0m Keys cannot start with the / symbol or have it repeated.\nTransformed key: "\x1B[33m${str}\x1B[0m" => "\x1B[32m${key}\x1B[0m"\n`);
-
-  if (key === '') throw new Error('Cannot set an empty key.');
-
-  return key;
-}
-
 class Client {
   #url;
 
@@ -67,7 +50,6 @@ class Client {
   async get(key, config = {}) {
     const { raw = false } = config;
 
-    key = transform(key);
     let value = this.cache[key];
     if (typeof value === 'undefined') {
       value = await this.fetch(`/${encode(key)}`);
@@ -85,10 +67,8 @@ class Client {
     if (typeof entries !== 'object') throw Error('Set method expects an object.');
 
     let query = '';
-    for (const str in entries) {
-      const value = JSON.stringify(entries[str]);
-
-      const key = transform(str);
+    for (const key in entries) {
+      const value = JSON.stringify(entries[key]);
       query += `${encode(key)}=${encode(value)}&`;
       this.cache[key] = value;
     }
@@ -103,7 +83,6 @@ class Client {
    * @param {String|Number} key Key
    */
   async delete(key) {
-    key = transform(key);
     delete this.cache[key];
     await this.fetch(`/${encode(key)}`, { method: 'DELETE' });
   }
