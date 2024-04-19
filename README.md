@@ -22,7 +22,6 @@ await client.get('key'); // str
 ```
 
 ## Docs
-Warning: Keys cannot start with the `/` symbol or have it repeated.
 ### `class Client(String url?)`
 The parameter url is an optional custom DB URL.
 
