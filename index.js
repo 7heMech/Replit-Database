@@ -1,3 +1,5 @@
+const fs = require("fs");
+
 const parseJson = (val) => {
   try {
     return JSON.parse(val);
@@ -9,16 +11,35 @@ const parseJson = (val) => {
 const encode = encodeURIComponent;
 
 class Client {
+  #lastRefresh;
   #url;
+
+  #getUrl() {
+    if (!this.#lastRefresh) return this.#url;
+
+    if (Date.now() < this.#lastRefresh + 1000 * 60 * 60) {
+      return this.#url;
+    }
+
+    this.#url = process.env.REPLIT_DB_URL || fs.readFileSync.call(null, "/tmp/replitdb", "utf8");
+    this.#lastRefresh = Date.now();
+
+    return this.#url;
+  }
 
   /**
    * Initiates Class.
    * @param {String} [url] Custom database URL
    * @param {String} [audience] Optional auth for custom servers.
    */
-  constructor(url = process.env.REPLIT_DB_URL, audience) {
-    this.#url = new URL(url).toString();
-    if (this.#url.endsWith('/')) this.#url = this.#url.slice(0, -1);
+  constructor(url, audience) {
+    if (url) {
+      this.#url = new URL(url).toString();
+      if (this.#url.endsWith('/')) this.#url = this.#url.slice(0, -1);
+    } else {
+      this.#lastRefresh = 1;
+    }
+
 
     this.fetch = async (path, { body, method } = {}) => {
       const options = {
@@ -30,7 +51,7 @@ class Client {
         body
       };
 
-      const res = await fetch(`${this.#url}${path}`, options);
+      const res = await fetch(`${this.#getUrl()}${path}`, options);
       if (options.method === 'GET') return res.text();
     }
 
