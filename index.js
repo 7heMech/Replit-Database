@@ -13,8 +13,8 @@ class Client {
 
   /**
    * Initiates Class.
-   * @param {String} url Custom database URL
-   * @param {String} audience Optional auth for custom servers.
+   * @param {String} [url] Custom database URL
+   * @param {String} [audience] Optional auth for custom servers.
    */
   constructor(url, audience) {
     this.#url = new URL(url || process.env.REPLIT_DB_URL).toString();

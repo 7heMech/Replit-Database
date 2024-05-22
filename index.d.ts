@@ -1,8 +1,8 @@
 declare class Client<T extends Record<string | number, any> = Record<string | number, any>> {
   /**
    * Initiates Class.
-   * @param {String} url Custom database URL
-   * @param {String} audience Optional auth for custom servers.
+   * @param {String} [url] Custom database URL
+   * @param {String} [audience] Optional auth for custom servers.
    */
 	constructor(url?: string, audience?: string);
 
