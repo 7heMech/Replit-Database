@@ -16,8 +16,8 @@ class Client {
    * @param {String} [url] Custom database URL
    * @param {String} [audience] Optional auth for custom servers.
    */
-  constructor(url, audience) {
-    this.#url = new URL(url || process.env.REPLIT_DB_URL).toString();
+  constructor(url = process.env.REPLIT_DB_URL, audience) {
+    this.#url = new URL(url).toString();
     if (this.#url.endsWith('/')) this.#url = this.#url.slice(0, -1);
 
     this.fetch = async (path, { body, method } = {}) => {
