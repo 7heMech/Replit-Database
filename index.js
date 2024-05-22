@@ -11,18 +11,14 @@ const parseJson = (val) => {
 const encode = encodeURIComponent;
 
 class Client {
-  #lastRefresh;
+  #nextRefresh;
   #url;
 
   #getUrl() {
-    if (!this.#lastRefresh) return this.#url;
-
-    if (Date.now() < this.#lastRefresh + 1000 * 60 * 60) {
-      return this.#url;
-    }
+    if (!this.#nextRefresh || Date.now() < this.#nextRefresh) return this.#url;
 
     this.#url = process.env.REPLIT_DB_URL || fs.readFileSync.call(null, "/tmp/replitdb", "utf8");
-    this.#lastRefresh = Date.now();
+    this.#nextRefresh = Date.now() + 1000 * 60 * 60;
 
     return this.#url;
   }
@@ -37,9 +33,8 @@ class Client {
       this.#url = new URL(url).toString();
       if (this.#url.endsWith('/')) this.#url = this.#url.slice(0, -1);
     } else {
-      this.#lastRefresh = 1;
+      this.#nextRefresh = 1;
     }
-
 
     this.fetch = async (path, { body, method } = {}) => {
       const options = {
