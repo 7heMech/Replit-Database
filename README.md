@@ -10,13 +10,14 @@ Replit Storage is a simple way to use the Replit Database in your repl.
 const { Client } = require("replit-storage");
 const client = new Client();
 
-const key = 'str';
-
+const key = 'exampleKey';
+const value = 'exampleValue';
+await client.set(key, value); // Sets `exampleKey` to `exampleValue`
+// OR
 await client.set({
-	key, // key: str
-	[key]: key, // str: str
-	other: 'value' // other: value
-});
+  key1: 'value1',
+  key2: 'value2'
+}); // Sets multiple key-value pairs (with the same performance)
 
 await client.get('key'); // str
 ```
@@ -39,9 +40,9 @@ client.get("key", { raw: false });
 ```
 
 
-> `set(Object entries)`
+> `set(String|Number|Object keyOrEntries, any value?)`
 
-Sets entries through an object.
+Sets entries through an object or a key/value pair.
 
 
 > `delete(String key)`

@@ -1,5 +1,3 @@
-const { create } = require('replit-identity');
-
 const parseJson = (val) => {
   try {
     return JSON.parse(val);
@@ -16,18 +14,17 @@ class Client {
   /**
    * Initiates Class.
    * @param {String} url Custom database URL
-   * @param {String} audience Audience for identity auth.
+   * @param {String} audience Optional auth for custom servers.
    */
   constructor(url, audience) {
     this.#url = new URL(url || process.env.REPLIT_DB_URL).toString();
     if (this.#url.endsWith('/')) this.#url = this.#url.slice(0, -1);
 
-    this.auth = audience ? create(audience) : null;
     this.fetch = async (path, { body, method } = {}) => {
       const options = {
         method: method || (body ? 'POST' : 'GET'),
         headers: {
-          authorization: this.auth,
+          authorization: audience,
           'Content-Type': body ? 'application/x-www-form-urlencoded' : 'application/json',
         },
         body
@@ -60,11 +57,19 @@ class Client {
   }
 
   /**
-   * Sets entries through an object.
-   * @param {Object} entries An object containing key/value pairs to be set.
+   * Sets entries through an object or a key-value pair.
+   * @param {String|Number|Object} keyOrEntries - The key to set or an object containing key/value pairs to set.
+   * @param {*} [value] - The value to set if the first parameter is a key.
    */
-  async set(entries) {
-    if (typeof entries !== 'object') throw Error('Set method expects an object.');
+  async set(keyOrEntries, value) {
+    let entries = {};
+    if (typeof keyOrEntries === 'object' && value === undefined) {
+      entries = keyOrEntries;
+    } else if (typeof keyOrEntries === 'string' || typeof keyOrEntries === 'number') {
+      entries[keyOrEntries] = value;
+    } else {
+      throw Error('Invalid arguments passed to set method.');
+    }
 
     let query = '';
     for (const key in entries) {

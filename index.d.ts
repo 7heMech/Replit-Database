@@ -2,7 +2,7 @@ declare class Client<T extends Record<string | number, any> = Record<string | nu
   /**
    * Initiates Class.
    * @param {String} url Custom database URL
-   * @param {String} audience Audience for identity auth.
+   * @param {String} audience Optional auth for custom servers.
    */
 	constructor(url?: string, audience?: string);
 
@@ -18,10 +18,14 @@ declare class Client<T extends Record<string | number, any> = Record<string | nu
 	}): Promise<T[K] | string>;
 
 	/**
-	 * Sets entries through an object.
-	 * @param {Object} entries An object containing key/value pairs to be set.
+	 * Sets entries through an object or a key-value pair.
+	 * @param {String|Number|Object} keyOrEntries - The key to set or an object containing key/value pairs to set.
+	 * @param {*} [value] - The value to set if the first parameter is a key.
 	 */
-	public set(entries: Partial<T>): Promise<void>;
+	public set<K extends keyof T>(
+		keyOrEntries: K | Partial<T>, 
+		value?: T[K]
+	): Promise<void>;
 
 	/**
 	 * Deletes a key
