@@ -14,11 +14,10 @@ const key = 'exampleKey';
 const value = 'exampleValue';
 await client.set(key, value); // Sets `exampleKey` to `exampleValue`
 // OR
-await client.set({
+await client.setMany({
   key1: 'value1',
   key2: 'value2'
-}); // Sets multiple key-value pairs (with the same performance)
-
+}); // Sets multiple key-value pairs (with better performance)
 await client.get('key'); // str
 ```
 
@@ -40,9 +39,14 @@ client.get("key", { raw: false });
 ```
 
 
-> `set(String|Number|Object keyOrEntries, any value?)`
+> `set(String|Number key, any value)`
 
-Sets entries through an object or a key/value pair.
+Sets a single entry through a key-value pair.
+
+
+> `setMany(Object entries)`
+
+Sets multiple key-value pairs through an object.
 
 
 > `delete(String key)`

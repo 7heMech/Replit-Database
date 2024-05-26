@@ -18,14 +18,17 @@ declare class Client<T extends Record<string | number, any> = Record<string | nu
 	}): Promise<T[K] | string>;
 
 	/**
-	 * Sets entries through an object or a key-value pair.
-	 * @param {String|Number|Object} keyOrEntries - The key to set or an object containing key/value pairs to set.
-	 * @param {*} [value] - The value to set if the first parameter is a key.
+	 * Sets a single entry through a key-value pair.
+	 * @param {String|Number} key - The key to set.
+	 * @param {*} value - The value to set for the key.
 	 */
-	public set<K extends keyof T>(
-		keyOrEntries: K | Partial<T>, 
-		value?: T[K]
-	): Promise<void>;
+	public set<K extends keyof T>(key: K, value: T[K]): Promise<void>;
+
+	/**
+	 * Sets multiple entries through an object.
+	 * @param {Object} entries - An object containing key/value pairs to set.
+	 */
+	public setMany(entries: Partial<T>): Promise<void>;
 
 	/**
 	 * Deletes a key
