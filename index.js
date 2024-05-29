@@ -84,18 +84,29 @@ class Client {
   }
 
   /**
-   * Sets entries through an object or a key-value pair.
-   * @param {String|Number|Object} keyOrEntries - The key to set or an object containing key/value pairs to set.
-   * @param {*} [value] - The value to set if the first parameter is a key.
+   * Sets a single entry through a key-value pair.
+   * @param {String|Number} key - The key to set.
+   * @param {*} value - The value to set for the key.
    */
-  async set(keyOrEntries, value) {
-    let entries = {};
-    if (typeof keyOrEntries === 'object' && value === undefined) {
-      entries = keyOrEntries;
-    } else if (typeof keyOrEntries === 'string' || typeof keyOrEntries === 'number') {
-      entries[keyOrEntries] = value;
-    } else {
-      throw Error('Invalid arguments passed to set method.');
+  async set(key, value) {
+    if (typeof key !== 'string' && typeof key !== 'number') {
+      throw Error('Invalid arguments passed to set method. Key must be a string or number.');
+    }
+
+    value = JSON.stringify(value);
+    this.cache[key] = value;
+
+    await this.fetch('/', { body: `${encode(key)}=${encode(value)}` });
+  }
+
+
+  /**
+   * Sets multiple entries through an object.
+   * @param {Object} entries - An object containing key/value pairs to set.
+   */
+  async setMany(entries) {
+    if (typeof entries !== 'object' || entries === null) {
+      throw new Error('Invalid argument passed to setMany method. Expected an object.');
     }
 
     let query = '';
