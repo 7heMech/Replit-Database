@@ -1,5 +1,10 @@
 const fs = require("fs");
 
+const parseUrl = (str) => {
+  const url = new URL(str).toString();
+  return url.endsWith('/') ? url.slice(0, -1) : url;
+}
+
 const parseJson = (val) => {
   try {
     return JSON.parse(val);
@@ -17,36 +22,42 @@ class Client {
   #getUrl() {
     if (!this.#nextRefresh || Date.now() < this.#nextRefresh) return this.#url;
 
-    this.#url = process.env.REPLIT_DB_URL || fs.readFileSync.call(null, "/tmp/replitdb", "utf8");
+
+    this.#url = parseUrl(process.env.REPLIT_DB_URL || fs.readFileSync.call(null, "/tmp/replitdb", "utf8"));
     this.#nextRefresh = Date.now() + 1000 * 60 * 60;
 
     return this.#url;
-  }
+  } 
 
   /**
    * Initiates Class.
    * @param {String} [url] Custom database URL
-   * @param {String} [audience] Optional auth for custom servers.
+   * @param {String} [auth] Optional auth for custom servers.
    */
-  constructor(url, audience) {
+  constructor(url, auth) {
     if (url) {
-      this.#url = new URL(url).toString();
-      if (this.#url.endsWith('/')) this.#url = this.#url.slice(0, -1);
+      this.#url = parseUrl(url);
     } else {
       this.#nextRefresh = 1;
     }
 
     this.fetch = async (path, { body, method } = {}) => {
-      const options = {
-        method: method || (body ? 'POST' : 'GET'),
-        headers: {
-          authorization: audience,
-          'Content-Type': body ? 'application/x-www-form-urlencoded' : 'application/json',
-        },
-        body
-      };
+      const headers = new Headers();
+      if (body) headers.set("Content-Type", "application/x-www-form-urlencoded");
+      if (auth) headers.set("authorization", auth);
 
-      const res = await fetch(`${this.#getUrl()}${path}`, options);
+      const options = { headers };
+
+      if (method) options.method = method;
+      else if (body) options.method = 'POST';
+      else if (path) options.method = 'GET';
+
+      if (body) options.body = body;
+
+      const url = this.#getUrl() + path;
+      const res = await fetch(url, options);
+
+      if (!res.ok) return;
       if (options.method === 'GET') return res.text();
     }
 
@@ -73,28 +84,18 @@ class Client {
   }
 
   /**
-   * Sets a single entry through a key-value pair.
-   * @param {String|Number} key - The key to set.
-   * @param {*} value - The value to set for the key.
+   * Sets entries through an object or a key-value pair.
+   * @param {String|Number|Object} keyOrEntries - The key to set or an object containing key/value pairs to set.
+   * @param {*} [value] - The value to set if the first parameter is a key.
    */
-  async set(key, value) {
-    if (typeof key !== 'string' && typeof key !== 'number') {
-      throw Error('Invalid arguments passed to set method. Key must be a string or number.');
-    }
-
-    value = JSON.stringify(value);
-    this.cache[key] = value;
-
-    await this.fetch('/', { body: `${encode(key)}=${encode(value)}` });
-  }
-
-  /**
-   * Sets multiple entries through an object.
-   * @param {Object} entries - An object containing key/value pairs to set.
-   */
-  async setMany(entries) {
-    if (typeof entries !== 'object' || entries === null) {
-      throw new Error('Invalid argument passed to setMany method. Expected an object.');
+  async set(keyOrEntries, value) {
+    let entries = {};
+    if (typeof keyOrEntries === 'object' && value === undefined) {
+      entries = keyOrEntries;
+    } else if (typeof keyOrEntries === 'string' || typeof keyOrEntries === 'number') {
+      entries[keyOrEntries] = value;
+    } else {
+      throw Error('Invalid arguments passed to set method.');
     }
 
     let query = '';
@@ -126,7 +127,7 @@ class Client {
   async list(config = {}) {
     const { prefix = '' } = config;
 
-    const text = await this.fetch(`/?encode=true&prefix=${encode(prefix)}`);
+    const text = await this.fetch(`?encode=true&prefix=${encode(prefix)}`);
     if (text.length === 0) return [];
 
     return text.split('\n').map(decodeURIComponent);

@@ -1,6 +1,8 @@
+run = "bun test"
 entrypoint = "index.js"
 
 hidden = [".config", "package-lock.json"]
+modules = ["bun-1.1"]
 
 [[hints]]
 regex = "Error \\[ERR_REQUIRE_ESM\\]"
@@ -77,3 +79,7 @@ language = "nodejs"
 [deployment]
 deploymentTarget = "static"
 publicDir = "/"
+
+[[ports]]
+localPort = 37361
+externalPort = 80
