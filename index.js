@@ -27,7 +27,7 @@ class Client {
     this.#nextRefresh = Date.now() + 1000 * 60 * 60;
 
     return this.#url;
-  } 
+  }
 
   /**
    * Initiates Class.
@@ -172,10 +172,10 @@ class Client {
    * Delete many entries by keys.
    * @param {Array<String|Number>} keys List of keys to delete.
    */
-	async deleteMany(keys) {
-		const promises = keys.map(key => this.delete(key));
-		await Promise.all(promises);
-	}
+  async deleteMany(keys) {
+    const promises = keys.map(key => this.delete(key));
+    await Promise.all(promises);
+  }
 }
 
 module.exports = { Client };

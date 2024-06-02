@@ -80,6 +80,6 @@ Deletes multiple keys.
 
 ## Tests
 ```sh
-npm i
-npm run test
+bun i
+bun run test
 ```
