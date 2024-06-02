@@ -98,28 +98,6 @@ class Client {
     await this.fetch('/', { body: `${encode(key)}=${encode(value)}` });
   }
 
-
-  /**
-   * Sets multiple entries through an object.
-   * @param {Object} entries - An object containing key/value pairs to set.
-   */
-  async setMany(entries) {
-    if (typeof entries !== 'object' || entries === null) {
-      throw new Error('Invalid argument passed to setMany method. Expected an object.');
-    }
-
-    let query = '';
-    for (const key in entries) {
-      const value = JSON.stringify(entries[key]);
-      query += `${encode(key)}=${encode(value)}&`;
-      this.cache[key] = value;
-    }
-
-    const body = query.slice(0, -1); // removes the trailing &
-
-    await this.fetch('/', { body });
-  }
-
   /**
    * Deletes a key
    * @param {String|Number} key Key
@@ -144,13 +122,33 @@ class Client {
   }
 
   /**
-   * Clears the database.
+   * Sets multiple entries through an object.
+   * @param {Object} entries - An object containing key/value pairs to set.
    */
-  async empty() {
-    this.cache = {};
+  async setMany(entries) {
+    if (typeof entries !== 'object' || entries === null) {
+      throw new Error('Invalid argument passed to setMany method. Expected an object.');
+    }
 
-    const keys = await this.list();
-    await this.deleteMany(keys);
+    let query = '';
+    for (const key in entries) {
+      const value = JSON.stringify(entries[key]);
+      query += `${encode(key)}=${encode(value)}&`;
+      this.cache[key] = value;
+    }
+
+    const body = query.slice(0, -1); // removes the trailing &
+
+    await this.fetch('/', { body });
+  }
+
+  /**
+   * Delete many entries by keys.
+   * @param {Array<String|Number>} keys List of keys to delete.
+   */
+  async deleteMany(keys) {
+    const promises = keys.map(key => this.delete(key));
+    await Promise.all(promises);
   }
 
   /**
@@ -168,12 +166,13 @@ class Client {
   }
 
   /**
-   * Delete many entries by keys.
-   * @param {Array<String|Number>} keys List of keys to delete.
+   * Clears the database.
    */
-  async deleteMany(keys) {
-    const promises = keys.map(key => this.delete(key));
-    await Promise.all(promises);
+  async empty() {
+    this.cache = {};
+
+    const keys = await this.list();
+    await this.deleteMany(keys);
   }
 }
 

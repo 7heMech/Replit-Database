@@ -25,12 +25,6 @@ declare class Client<T extends Record<string | number, any> = Record<string | nu
 	public set<K extends keyof T>(key: K, value: T[K]): Promise<void>;
 
 	/**
-	 * Sets multiple entries through an object.
-	 * @param {Object} entries - An object containing key/value pairs to set.
-	 */
-	public setMany(entries: Partial<T>): Promise<void>;
-
-	/**
 	 * Deletes a key
 	 * @param {String|Number} key Key
 	 */
@@ -46,9 +40,16 @@ declare class Client<T extends Record<string | number, any> = Record<string | nu
 	}): Promise<(keyof T)[]>;
 
 	/**
-	 * Clears the database.
+	 * Sets multiple entries through an object.
+	 * @param {Object} entries - An object containing key/value pairs to set.
 	 */
-	public empty(): Promise<void>;
+	public setMany(entries: Partial<T>): Promise<void>;
+
+	/**
+	 * Delete many entries by keys.
+	 * @param {Array<String|Number>} keys List of keys to delete.
+	 */
+	public deleteMany(keys: Array<keyof T>): Promise<void>;
 
 	/**
 	 * Get all key/value pairs and return as an object.
@@ -56,10 +57,9 @@ declare class Client<T extends Record<string | number, any> = Record<string | nu
 	public getAll(): Promise<T>;
 
 	/**
-	 * Delete many entries by keys.
-	 * @param {Array<String|Number>} keys List of keys to delete.
+	 * Clears the database.
 	 */
-	public deleteMany(keys: Array<keyof T>): Promise<void>;
+	public empty(): Promise<void>;
 }
 
 export { Client };
