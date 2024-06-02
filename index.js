@@ -42,23 +42,22 @@ class Client {
     }
 
     this.fetch = async (path, { body, method } = {}) => {
-      const headers = new Headers();
-      if (body) headers.set("Content-Type", "application/x-www-form-urlencoded");
-      if (auth) headers.set("authorization", auth);
-
+      const headers = {};
       const options = { headers };
 
-      if (method) options.method = method;
-      else if (body) options.method = 'POST';
-      else if (path) options.method = 'GET';
+      if (auth) headers["authorization"] = auth;
 
-      if (body) options.body = body;
+      if (body) {
+        options.body = body;
+        options.method = 'POST';
+        headers["Content-Type"] = "application/x-www-form-urlencoded";
+      } else if (method) options.method = method;
 
       const url = this.#getUrl() + path;
       const res = await fetch(url, options);
 
       if (!res.ok) return;
-      if (options.method === 'GET') return res.text();
+      if (!options.method) return res.text();
     }
 
     this.cache = {};
