@@ -134,6 +134,7 @@ class Client {
 
     let query = '';
     for (const key in entries) {
+      // maybe need to check for valid keys here as well
       const value = JSON.stringify(entries[key]);
       query += `${encode(key)}=${encode(value)}&`;
       this.cache[key] = value;
