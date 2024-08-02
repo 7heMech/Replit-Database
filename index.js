@@ -1,3 +1,5 @@
+if (!globalThis.fetch) throw "No fetch API found, please upgrade to Node.js v17.5.0 or above.";
+
 const fs = require("fs");
 
 const parseUrl = (str) => {
